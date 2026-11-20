@@ -22,6 +22,7 @@ import logging
 import string
 import random
 import zoneinfo
+from datetime import datetime
 
 from django.utils import timezone
 logger = logging.getLogger(__name__)
@@ -164,8 +165,8 @@ def getUploadsForCourse(course):
     
     Raises Course.DoesNotExist error if no course has that number
     """
-
     course_obj = Course.objects.filter(course=course).first()
+    
     if course_obj is None:
         return []
 
@@ -177,8 +178,10 @@ def getUploadsForCourse(course):
     valid = []
     for upload in uploads:
         timestamp = upload.uploaded_at
+
+        # Additional check to force UTC timezone, if miraculously not.
         if timezone.is_naive(timestamp):
-            timestamp = timestamp.replace(tzinfo=datetime.time.utc)
+            timestamp = timestamp.replace(tzinfo=datetime.timezone.utc)
 
         local = timestamp.astimezone(CHICAGO)
         days = [course_obj.day_mon, course_obj.day_tue, course_obj.day_wed, course_obj.day_thu, course_obj.day_fri]

@@ -22,4 +22,7 @@ urlpatterns = [
     path('createQRCodeUpload/', views.createQRCodeUpload, name='createQRCodeUpload'),
    # HM5.5
     path('dumpUploads', views.dumpUploads, name='dumpUploads'),
+
+    #HW6.2
+    path('getUploads', views.getUploads, name='getUploads')
 ]

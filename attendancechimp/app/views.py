@@ -15,10 +15,10 @@ from datetime import datetime
 import zoneinfo
 import json
 import io
-from django.utils import timezone
 
 from .models import (InstructorProfile, StudentProfile, Course, Enrollment,
-                     Lecture, QRCodeUpload, is_instructor, is_student)
+                     Lecture, QRCodeUpload, is_instructor, is_student, 
+                     getUploadsForCourse)
 
 CDT = zoneinfo.ZoneInfo("America/Chicago")
 
@@ -234,3 +234,29 @@ def dumpUploads(request):
     return JsonResponse(data, safe=False)
 
 
+# ---------------------------------------------------------------------------
+# HW6  — getUploads
+# ---------------------------------------------------------------------------
+
+CHICAGO = zoneinfo.ZoneInfo("America/Chicago")
+def getUploads(request):
+    if not request.user.is_authenticated or not is_instructor(request.user):
+        return HttpResponse("Unauthorized", status=401)
+
+    course = request.GET.get('course')
+
+    if not course:
+        return JsonResponse({'error': 'Missing "course" query parameter.'}, status=400)
+
+    if not Course.objects.filter(course=course).exists():
+        return JsonResponse({'error': f'Course{course} not found'}, status=404)
+
+    uploads = getUploadsForCourse(course)
+    data = [
+        {
+            'username': upload.student.username,
+            'upload_time': upload.uploaded_at.astimezone(CHICAGO).strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for upload in uploads
+    ]
+    return JsonResponse(data)
