@@ -15,7 +15,7 @@ from datetime import datetime
 import zoneinfo
 import json
 import io
-import timezone
+from django.utils import timezone
 
 from .models import (InstructorProfile, StudentProfile, Course, Enrollment,
                      Lecture, QRCodeUpload, is_instructor, is_student)
