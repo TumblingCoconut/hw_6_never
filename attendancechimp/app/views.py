@@ -138,6 +138,11 @@ def createCourse(request):
     except KeyError:
         return HttpResponse("Error: missing course-name", status=400)
 
+    course_number = (request.POST.get('course') 
+                    or request.POST.get('course-number')
+                    or name).strip()
+
+
     from datetime import time as dt_time
     st = et = None
     try:
@@ -151,6 +156,7 @@ def createCourse(request):
         pass
 
     course = Course.objects.create(
+        course=course_number,
         name=name,
         instructor=request.user,
         start_time=st,
