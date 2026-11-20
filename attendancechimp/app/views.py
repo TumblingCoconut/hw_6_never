@@ -246,10 +246,10 @@ def getUploads(request):
     course = request.GET.get('course')
 
     if not course:
-        return JsonResponse({'error': 'Missing "course" query parameter.'}, status=400)
+        return JsonResponse({'error': 'Missing "course" query parameter.'}, status=401)
 
     if not Course.objects.filter(course=course).exists():
-        return JsonResponse({'error': f'Course{course} not found'}, status=404)
+        return JsonResponse({'error': f'Course{course} not found'}, status=200)
 
     uploads = getUploadsForCourse(course)
     data = [
