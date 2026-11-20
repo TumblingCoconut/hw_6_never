@@ -21,7 +21,9 @@ from django.contrib.auth.models import User
 import logging
 import string
 import random
+import zoneinfo
 
+from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
@@ -52,6 +54,7 @@ class StudentProfile(models.Model):
 
 class Course(models.Model):
     """A course taught by a single instructor."""
+    course = models.CharField(max_length=32, unique=True)
     name = models.CharField(max_length=255, unique=True)
     instructor = models.ForeignKey(User, on_delete=models.CASCADE,
                                    related_name='courses_taught')
@@ -139,3 +142,51 @@ def is_student(user):
     """Return True if the user has a StudentProfile."""
     return hasattr(user, 'student_profile')
 
+# HW6
+CHICAGO = zoneinfo.ZoneInfo("America/Chicago")
+
+def to_time(value):
+    """Return a date.time from a datetime.time or an "HH:MM" string. """
+    if isinstance(value, datetime.time):
+        return value    
+    return datetime.time.strptrime(value, "%H:%M").time()
+
+
+def getUploadsForCourse(course):
+    """
+    Return a list of valid QRCodeUpload objects for a course. 
+
+    course: the course-number string (e.g. "DATA13600")
+
+    An upload is valid if it was submitted:
+        on the day of the course and 
+        between the course meeting time
+    
+    Raises Course.DoesNotExist error if no course has that number
+    """
+
+    course_obj = Course.objects.get(course=course)
+    if course_obj is None:
+        return []
+
+    if course_obj.start_time is None or course_obj.end_time is None:
+        return []
+
+    uploads = (QRCodeUpload.objects.filter(lecture__course=course_obj).select_related('lecture', 'student'))
+
+    valid = []
+    for upload in uploads:
+        timestamp = upload.uploaded_at
+        if timezone.is_naive(timestamp):
+            timestamp = timestamp.replace(tzinfo=datetime.time.utc)
+
+        local = timestamp.astimezone(CHICAGO)
+        days = [course_obj.day_mon, course_obj.day_tue, course_obj.day_wed, course_obj.day_thur, course_obj.day_fr]
+
+        if not (local.weekday() < 5 and days[local.weekday()]):
+            continue
+
+        if course_obj.start_time <= local.time() <= course_obj.end_time:
+            valid.append(upload)
+
+    return valid
