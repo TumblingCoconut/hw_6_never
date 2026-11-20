@@ -246,7 +246,7 @@ def getUploads(request):
     course = request.GET.get('course')
 
     if not course:
-        return JsonResponse({'error':'Missing Course parameter'}, status=400)
+        return JsonResponse({'error':'Missing Course parameter'})
 
     if not Course.objects.filter(course=course).exists():
         return JsonResponse([])
