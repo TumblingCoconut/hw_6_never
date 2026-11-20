@@ -165,7 +165,7 @@ def getUploadsForCourse(course):
     Raises Course.DoesNotExist error if no course has that number
     """
 
-    course_obj = Course.objects.get(course=course)
+    course_obj = Course.objects.filter(course=course).first()
     if course_obj is None:
         return []
 
