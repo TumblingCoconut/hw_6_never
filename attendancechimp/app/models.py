@@ -181,7 +181,7 @@ def getUploadsForCourse(course):
             timestamp = timestamp.replace(tzinfo=datetime.time.utc)
 
         local = timestamp.astimezone(CHICAGO)
-        days = [course_obj.day_mon, course_obj.day_tue, course_obj.day_wed, course_obj.day_thur, course_obj.day_fr]
+        days = [course_obj.day_mon, course_obj.day_tue, course_obj.day_wed, course_obj.day_thu, course_obj.day_fri]
 
         if not (local.weekday() < 5 and days[local.weekday()]):
             continue
